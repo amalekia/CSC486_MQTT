@@ -6,7 +6,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.List;
 
-public class Publisher implements AutoCloseable {
+
+public class Publisher implements AutoCloseable{
 
 	private static final String BROKER = "tcp://test.mosquitto.org:1883";
 	private static final String TOPIC = "adr-spence";
@@ -40,6 +41,9 @@ public class Publisher implements AutoCloseable {
 		try (Publisher publisher = new Publisher()) {
 			// Get the list of lines from the CSVReaderPublisher class
 			List<String> csvLines = CSVReaderPublisher.readCSV(csvFile);
+
+			// Add lines in csv to Repo ArrayList
+			Repository.getInstance().addData(csvLines);
 
 			System.out.println("Publishing messages from CSV...");
 
