@@ -48,8 +48,8 @@ public class Main extends JFrame {
         setLayout(new BorderLayout());
         add(centralPanel, BorderLayout.CENTER);
         add(viewStatusBar, BorderLayout.SOUTH);
-        Blackboard.getInstance().addPropertyChangeListener(centralPanel);
-        Blackboard.getInstance().addPropertyChangeListener(viewStatusBar);
+        Repository.getInstance().addPropertyChangeListener(centralPanel);
+        Repository.getInstance().addPropertyChangeListener(viewStatusBar);
     }
 
     public void about() {
