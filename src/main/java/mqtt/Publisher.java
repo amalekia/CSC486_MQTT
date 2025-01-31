@@ -22,7 +22,7 @@ public class Publisher implements AutoCloseable{
 
 	public void publishMessage(String message) throws MqttException {
 		MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-		mqttMessage.setQos(2); // Quality of Service
+		mqttMessage.setQos(2);
 		client.publish(TOPIC, mqttMessage);
 		System.out.println("Message published: " + message);
 	}
@@ -42,13 +42,14 @@ public class Publisher implements AutoCloseable{
 			// Get the list of lines from the CSVReaderPublisher class
 			List<String> csvLines = CSVReaderPublisher.readCSV(csvFile);
 
-			// Add lines in csv to Repo ArrayList
-			Repository.getInstance().addData(csvLines);
-
 			System.out.println("Publishing messages from CSV...");
 
 			// Publish each line with a 10-second delay
+			int lineCounter = 0;
 			for (String line : csvLines) {
+				// Add lines in csv to Repo ArrayList
+				lineCounter++;
+				Repository.getInstance().addData(String.valueOf(lineCounter), line);
 				publisher.publishMessage(line);
 			Thread.sleep(10000); // 10-second delay
 			}

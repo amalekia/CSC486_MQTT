@@ -1,16 +1,17 @@
 package mqtt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.beans.PropertyChangeSupport;
 
-class Repository {
+class Repository extends PropertyChangeSupport {
     // Singleton instance
     private static Repository instance;
-    private List<String> csvData;
+    private LinkedList<String> csvData;
 
     // Private constructor to prevent instantiation
     private Repository() {
-        csvData = new ArrayList<>();
+        super(instance);
+        csvData = new LinkedList<>();
         System.out.println("Repository is instantiated.");
     }
 
@@ -23,20 +24,22 @@ class Repository {
     }
 
     // Store each line from the CSV in the repository
-    public void addData(List<String> data) {
-        csvData.addAll(data);
-        System.out.println("Data added to the repository.");
+    public void addData(String key, Object value) {
+        csvData.add(key + " : " + value);
+        firePropertyChange(key, null, value);
     }
 
-    // Method to retrieve stored data
-    public List<String> getData() {
-        return new ArrayList<>(csvData);
+    // Getter to retrieve stored data
+    public LinkedList<String> getCsvData() {
+        return csvData;
     }
 
-    public void printData() {
-        System.out.println("Stored CSV Data:");
-        for (String line : csvData) {
-            System.out.println(line);
+    // Getter to retrieve a specific line by index
+    public String getCsvDataLine(int index) {
+        if (index >= 0 && index < csvData.size()) {
+            return csvData.get(index);
+        } else {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
         }
     }
 }
