@@ -54,8 +54,9 @@ public class Main extends JFrame {
 
     public void about() {
         // view
-        JOptionPane.showMessageDialog(this, "About Skeleton");
+        JOptionPane.showMessageDialog(this, "Sam Morrisroe, Spencer Perley, Adrick Malekian");
     }
+
 
     public void pauseThread(boolean b) {
         // controller
