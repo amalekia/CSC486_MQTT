@@ -3,14 +3,16 @@ package mqtt;
 import java.util.LinkedList;
 import java.beans.PropertyChangeSupport;
 
-class Repository extends PropertyChangeSupport {
+class Repository {
     // Singleton instance
     private static Repository instance;
     private LinkedList<String> csvData;
+    public PropertyChangeSupport pcs;
+
 
     // Private constructor to prevent instantiation
     private Repository() {
-        super(instance);
+        pcs = new PropertyChangeSupport(this);
         csvData = new LinkedList<>();
         System.out.println("Repository is instantiated.");
     }
@@ -26,7 +28,7 @@ class Repository extends PropertyChangeSupport {
     // Store each line from the CSV in the repository
     public void addData(String key, Object value) {
         csvData.add(key + " : " + value);
-        firePropertyChange(key, null, value);
+        pcs.firePropertyChange(key, null, value);
     }
 
     // Getter to retrieve stored data
