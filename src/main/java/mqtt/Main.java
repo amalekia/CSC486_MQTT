@@ -4,15 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Main extends JFrame {
-    private Engine engine;
-    private Thread modelThread;
+    private Thread publisherThread;
+    private boolean engineRunning = false;
+    private Publisher publisher;
     private ViewPanel centralPanel;
     public static boolean isSubscriber = false;
-    private boolean engineRunning = false;
 
     public Main() {
-        engine = new Engine();
-
         setJMenuBar(createPubMenuBar());
 
         centralPanel = new ViewPanel();
@@ -103,20 +101,34 @@ public class Main extends JFrame {
 
     public void startEngine() {
         if (!engineRunning) {
-            modelThread = new Thread(engine);
-            modelThread.start();
-            engineRunning = true;
-            JOptionPane.showMessageDialog(this, "Engine started.");
+            try {
+                publisher = new Publisher();
+                publisherThread = new Thread(publisher);
+                publisherThread.start();
+                engineRunning = true;
+                JOptionPane.showMessageDialog(this, "Engine (Publisher) started.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Failed to start Publisher: " + e.getMessage());
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Engine is already running.");
+            JOptionPane.showMessageDialog(this, "Engine (Publisher) is already running.");
         }
     }
 
     public void stopEngine() {
         if (engineRunning) {
-            engine.pause(true);
-            engineRunning = false;
-            JOptionPane.showMessageDialog(this, "Engine stopped.");
+            try {
+                publisher.stop(true);  // Signal to stop
+                if (publisherThread != null) {
+                    publisherThread.interrupt();
+                    publisherThread.join();
+                }
+                publisher.close();
+                engineRunning = false;
+                JOptionPane.showMessageDialog(this, "Engine (Publisher) stopped.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error stopping Publisher: " + e.getMessage());
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Engine is not running.");
         }
@@ -124,10 +136,6 @@ public class Main extends JFrame {
 
     public void about() {
         JOptionPane.showMessageDialog(this, "Sam Morrisroe, Spencer Perley, Adrick Malekian");
-    }
-
-    public void pauseThread(boolean b) {
-        engine.pause(b);
     }
 
     public static void main(String[] args) {
