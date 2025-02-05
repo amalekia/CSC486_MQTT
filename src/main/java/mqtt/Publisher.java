@@ -43,10 +43,9 @@ public class Publisher implements AutoCloseable, Runnable{
 
 	@Override
 	public void run() {
-		String csvFile = "/Users/adrickmalekian/Desktop/CSC486_MQTT/src/main/java/mqtt/240729104131_data (1).csv";
+		String csvFile = "/Users/sammorrisroe/Desktop/CSC486_MQTT/csv-subscriber-tcptestmosquittoorg1883/s-1.msg.csv";
 
-		try (Publisher publisher = new Publisher()) {
-			// Get the list of lines from the CSVReaderPublisher class
+		try {
 			List<String> csvLines = CSVReaderPublisher.readCSV(csvFile);
 
 			System.out.println("Publishing messages from CSV...");
@@ -57,12 +56,16 @@ public class Publisher implements AutoCloseable, Runnable{
 				// Add lines in csv to Repo ArrayList
 				lineCounter++;
 				Repository.getInstance().addData(String.valueOf(lineCounter), line);
-				publisher.publishMessage(line);
+				//publisher.publishMessage(line);
 			Thread.sleep(1000); // 10-second delay
 			}
 
+			//publisher.publishMessage("test");
+			Thread.sleep(1000); // 10-second delay
+
+
 			System.out.println("Finished publishing all messages.");
-		} catch (MqttException | InterruptedException e) {
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
