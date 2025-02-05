@@ -7,7 +7,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.util.List;
 
 
-public class Publisher implements AutoCloseable, Runnable{
+public class Publisher implements AutoCloseable, Runnable {
+	private String csvFile;
+
 
 	private static final String BROKER = "tcp://test.mosquitto.org:1883";
 	private static final String TOPIC = "adr-spence";
@@ -20,7 +22,8 @@ public class Publisher implements AutoCloseable, Runnable{
 	public void stop(boolean stop) {
 		this.stop = stop;
 	}
-	public Publisher() throws MqttException {
+	public Publisher(String filePath) throws MqttException {
+		this.csvFile = filePath;
 		client = new MqttClient(BROKER, CLIENT_ID);
 		client.connect();
 		System.out.println("Connected to BROKER: " + BROKER);
@@ -49,7 +52,7 @@ public class Publisher implements AutoCloseable, Runnable{
 
 	@Override
 	public void run() {
-		String csvFile = "/Users/sammorrisroe/Desktop/CSC486_MQTT/csv-subscriber-tcptestmosquittoorg1883/s-1.msg.csv";
+		//String csvFile = "/Users/sammorrisroe/Desktop/CSC486_MQTT/csv-subscriber-tcptestmosquittoorg1883/s-1.msg.csv";
 
 		try {
 			List<String> csvLines = CSVReaderPublisher.readCSV(csvFile);

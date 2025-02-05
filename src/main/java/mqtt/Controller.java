@@ -23,6 +23,9 @@ public class Controller implements ActionListener{
         } else if (e.getActionCommand().equals("Connect")) {
             viewMain.startSubscriber();
 
+        } else if (e.getActionCommand().equals("Load")) {
+            viewMain.loadFile();
+
         } else if (e.getActionCommand().equals("Disconnect")) {
             viewMain.stopSubscriber();
 

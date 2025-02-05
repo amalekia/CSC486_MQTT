@@ -11,6 +11,7 @@ public class Main extends JFrame {
     private Publisher publisher;
     private Subscriber subscriber;
     private ViewPanel centralPanel;
+    private String selectedFilePath = null;
     public static boolean isSubscriber = false;
 
     public Main() {
@@ -29,7 +30,16 @@ public class Main extends JFrame {
     }
 
 
+    public void loadFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select CSV File");
+        int result = fileChooser.showOpenDialog(this);
 
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+            JOptionPane.showMessageDialog(this, "File Loaded: " + selectedFilePath);
+        }
+    }
 
     public void toggleSubPanel() {
         if (!isSubscriber) {
@@ -107,12 +117,17 @@ public class Main extends JFrame {
 
     public void startEngine() {
         if (!engineRunning) {
+            if (selectedFilePath == null) {
+                JOptionPane.showMessageDialog(this, "Please load a CSV file first!");
+                return;
+            }
+
             try {
-                publisher = new Publisher();
+                publisher = new Publisher(selectedFilePath);
                 publisherThread = new Thread(publisher);
                 publisherThread.start();
                 engineRunning = true;
-                JOptionPane.showMessageDialog(this, "Engine (Publisher) started.");
+                JOptionPane.showMessageDialog(this, "Publisher started with file: " + selectedFilePath);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Failed to start Publisher: " + e.getMessage());
             }
