@@ -16,19 +16,26 @@ import java.io.IOException;
  * @author javiergs Adrick Malekian Spencer Perley
  * @version 1.0
  */
-public class Subscriber implements MqttCallback {
-	public ArrayList<String> lines = new ArrayList<>();
+public class Subscriber implements MqttCallback, Runnable {
+	public static String line;
 	public int counter = 0;
 	private final static String BROKER = "tcp://test.mosquitto.org:1883";
 	private final static String TOPIC = "adr-spence";
 	private final static String CLIENT_ID = "csv-subscriber";
-	
-	public static void main(String[] args) {
+	private MqttClient client;
 
+
+	private boolean stop = false;
+
+	public void stop(boolean stop) {
+		this.stop = stop;
+	}
+
+	@Override
+	public void run() {
 		try {
-			MqttClient client = new MqttClient(BROKER, CLIENT_ID);
-			Subscriber subscriber = new Subscriber();
-			client.setCallback(subscriber);
+			client = new MqttClient(BROKER, CLIENT_ID);
+			client.setCallback(this); // Set this class as the callback handler
 			client.connect();
 			System.out.println("Connected to BROKER: " + BROKER);
 			client.subscribe(TOPIC);
@@ -37,32 +44,26 @@ public class Subscriber implements MqttCallback {
 			e.printStackTrace();
 		}
 	}
+
+	public void closeSub() throws MqttException {
+		if (client != null && client.isConnected()) {
+			client.disconnect();
+			System.out.println("Disconnected from BROKER: " + BROKER);
+		}
+	}
 	
 	@Override
 	public void connectionLost(Throwable throwable) {
 		System.out.println("Connection lost: " + throwable.getMessage());
 	}
-	
-	@Override
-	public void messageArrived(String s, MqttMessage mqttMessage) {
-		System.out.println("Message arrived. Topic: " + s +
-			" Message: " + new String(mqttMessage.getPayload()));
-		lines.add(mqttMessage.toString());
-		counter++;
 
-		if (counter == 1000) {
-			try (FileWriter writer = new FileWriter("/Users/adrickmalekian/Desktop/MQTT/src/main/java/javiergs/mqtt/new.csv")) {
-				for (String line : lines) {
-					writer.append(line);  // Write the string
-					writer.append("\n");  // Add a new line after each string
-				}
-				System.out.println("CSV file created at: " + "/Users/adrickmalekian/Desktop/MQTT/src/main/java/javiergs/mqtt/new.csv");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			lines.clear();
-		}
+	@Override
+	public void messageArrived(String topic, MqttMessage mqttMessage) {
+		String message = new String(mqttMessage.getPayload());
+		System.out.println("Received message on topic: " + topic + " -> " + message);
+		line = message; // Store if needed
 	}
+
 	
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {

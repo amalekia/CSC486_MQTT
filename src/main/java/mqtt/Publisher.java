@@ -27,11 +27,17 @@ public class Publisher implements AutoCloseable, Runnable{
 	}
 
 	public void publishMessage(String message) throws MqttException {
+
 		MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-		mqttMessage.setQos(2);
+
+		mqttMessage.setQos(2); // Quality of Service
+
 		client.publish(TOPIC, mqttMessage);
+
 		System.out.println("Message published: " + message);
+
 	}
+
 
 	@Override
 	public void close() throws MqttException {
@@ -50,22 +56,22 @@ public class Publisher implements AutoCloseable, Runnable{
 
 			System.out.println("Publishing messages from CSV...");
 
+
 			// Publish each line with a 10-second delay
 			int lineCounter = 0;
 			for (String line : csvLines) {
 				// Add lines in csv to Repo ArrayList
 				lineCounter++;
 				Repository.getInstance().addData(String.valueOf(lineCounter), line);
-				//publisher.publishMessage(line);
+				this.publishMessage(line);
 			Thread.sleep(1000); // 10-second delay
 			}
 
-			//publisher.publishMessage("test");
 			Thread.sleep(1000); // 10-second delay
 
 
 			System.out.println("Finished publishing all messages.");
-		} catch (InterruptedException e) {
+		} catch (MqttException | InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

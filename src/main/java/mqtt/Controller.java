@@ -21,8 +21,12 @@ public class Controller implements ActionListener{
         } else if (e.getActionCommand().equals("Stop")) {
             viewMain.stopEngine();
         } else if (e.getActionCommand().equals("Connect")) {
-            System.out.println("poop");
-        } else if (e.getActionCommand().equals("Switch to Publisher")) {
+            viewMain.startSubscriber();
+
+        } else if (e.getActionCommand().equals("Disconnect")) {
+            viewMain.stopSubscriber();
+
+        }else if (e.getActionCommand().equals("Switch to Publisher")) {
             viewMain.toggleSubPanel();
         } else if (e.getActionCommand().equals("Switch to Subscriber")) {
             viewMain.toggleSubPanel();

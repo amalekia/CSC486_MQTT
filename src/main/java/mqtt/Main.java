@@ -5,8 +5,11 @@ import java.awt.*;
 
 public class Main extends JFrame {
     private Thread publisherThread;
+    private Thread subscriberThread;
     private boolean engineRunning = false;
+    private boolean subRunning = false;
     private Publisher publisher;
+    private Subscriber subscriber;
     private ViewPanel centralPanel;
     public static boolean isSubscriber = false;
 
@@ -24,6 +27,9 @@ public class Main extends JFrame {
         Repository.getInstance().pcs.addPropertyChangeListener(centralPanel);
         Repository.getInstance().pcs.addPropertyChangeListener(viewStatusBar);
     }
+
+
+
 
     public void toggleSubPanel() {
         if (!isSubscriber) {
@@ -131,6 +137,41 @@ public class Main extends JFrame {
             }
         } else {
             JOptionPane.showMessageDialog(this, "Engine is not running.");
+        }
+    }
+
+    public void startSubscriber() {
+        if (!subRunning) {
+            try {
+                subscriber = new Subscriber();
+                subscriberThread = new Thread(subscriber);
+                subscriberThread.start();
+                subRunning = true;
+                JOptionPane.showMessageDialog(this, "Engine (Subscriber) started.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Failed to start Subscriber: " + e.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Engine (Subscriber) is already running.");
+        }
+    }
+
+    public void stopSubscriber() {
+        if (subRunning) {
+            try {
+                subscriber.stop(true);  // Signal to stop
+                if (subscriberThread != null) {
+                    subscriberThread.interrupt();
+                    subscriberThread.join();
+                }
+                subscriber.closeSub();
+                subRunning = false;
+                JOptionPane.showMessageDialog(this, "Engine (Subscriber) stopped.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error stopping Subscriber: " + e.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Subscriber is not running.");
         }
     }
 

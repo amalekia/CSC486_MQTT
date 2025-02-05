@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ViewPanel extends JPanel implements PropertyChangeListener {
 
-    private JTextArea textArea;
+    public JTextArea textArea;
     private Map<String, JPanel> emotionPanels;
 
     public ViewPanel() {
@@ -45,19 +45,15 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
         return panel;
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        String newValue = evt.getNewValue().toString();
-        textArea.append(newValue + "\n");
 
-        if (emotionPanels.containsKey(newValue)) {
-            JPanel panel = emotionPanels.get(newValue);
-            panel.setBackground(new Color(
-                    (int) (Math.random() * 256),
-                    (int) (Math.random() * 256),
-                    (int) (Math.random() * 256)
-            ));
-            panel.repaint();
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (Subscriber.line != null) {
+            textArea.append(Subscriber.line + "\n");
         }
+
     }
+
+
+
+
 }
