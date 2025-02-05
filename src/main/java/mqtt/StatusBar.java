@@ -15,8 +15,8 @@ public class StatusBar extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("time")) {
-            statuslabel.setText("Status: " + evt.getNewValue());
+        if (Subscriber.line != null) {
+            statuslabel.setText("Status: Connected");
         }
     }
 }

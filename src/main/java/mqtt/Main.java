@@ -63,22 +63,27 @@ public class Main extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu serverMenu = new JMenu("Server");
         JMenu aboutMenu = new JMenu("About");
+        JMenu helpMenu = new JMenu("Help");
         JMenuItem connectItem = new JMenuItem("Connect");
         JMenuItem disconnectItem = new JMenuItem("Disconnect");
         JMenuItem aboutItem = new JMenuItem("About");
+        JMenuItem helpItem = new JMenuItem("Help");
         JMenuItem toggleModeItem = new JMenuItem("Switch to Publisher");
 
         serverMenu.add(connectItem);
         serverMenu.add(disconnectItem);
         aboutMenu.add(aboutItem);
+        helpMenu.add(helpItem);
 
         toggleModeItem.addActionListener(controller);
         connectItem.addActionListener(controller);
         disconnectItem.addActionListener(controller);
         aboutItem.addActionListener(controller);
+        helpItem.addActionListener(controller);
 
         menuBar.add(serverMenu);
         menuBar.add(aboutMenu);
+        menuBar.add(helpMenu);
         menuBar.add(toggleModeItem);
         return menuBar;
     }
@@ -113,6 +118,11 @@ public class Main extends JFrame {
         menuBar.add(aboutMenu);
         menuBar.add(toggleModeItem);
         return menuBar;
+    }
+
+    public void help() {
+        JOptionPane.showMessageDialog(this, "Connect: Establishes a connection to the broker\n" +
+                "Disconnect: Disconnects a connection to the broker");
     }
 
     public void startEngine() {
@@ -172,6 +182,7 @@ public class Main extends JFrame {
     }
 
     public void stopSubscriber() {
+        Subscriber.line = null;
         if (subRunning) {
             try {
                 subscriber.stop(true);  // Signal to stop

@@ -22,17 +22,16 @@ public class Controller implements ActionListener{
             viewMain.stopEngine();
         } else if (e.getActionCommand().equals("Connect")) {
             viewMain.startSubscriber();
-
         } else if (e.getActionCommand().equals("Load")) {
             viewMain.loadFile();
-
         } else if (e.getActionCommand().equals("Disconnect")) {
             viewMain.stopSubscriber();
-
-        }else if (e.getActionCommand().equals("Switch to Publisher")) {
+        } else if (e.getActionCommand().equals("Switch to Publisher")) {
             viewMain.toggleSubPanel();
         } else if (e.getActionCommand().equals("Switch to Subscriber")) {
             viewMain.toggleSubPanel();
+        } else if (e.getActionCommand().equals("Help")) {
+            viewMain.help();
         }
     }
 }
