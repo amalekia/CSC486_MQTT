@@ -3,28 +3,61 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ViewPanel extends JPanel implements PropertyChangeListener {
 
     private JTextArea textArea;
-    private JLabel label;
+    private Map<String, JPanel> emotionPanels;
 
     public ViewPanel() {
-        setLayout(new GridLayout(1, 2));
+        setLayout(new GridLayout(1,2));
         textArea = new JTextArea();
-        label = new JLabel();
-        add(textArea);
-        add(label);
+        textArea.setEditable(false);
+
+// Emotion panel grid
+        JPanel emotionGrid = new JPanel(new GridLayout(2, 4, 5, 5));
+        emotionPanels = new HashMap<>();
+
+        String[] emotions = {"+++","++-","+-+"," +--","-++","-+-","--+","---"};
+        for (String emotion : emotions) {
+            JPanel panel = createEmotionPanel(emotion);
+            emotionPanels.put(emotion, panel);
+            emotionGrid.add(panel);
+        }
+
+        add(new JScrollPane(textArea), BorderLayout.NORTH);
+        add(emotionGrid, BorderLayout.CENTER);
+    }
+
+    private JPanel createEmotionPanel(String text) {
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        panel.setPreferredSize(new Dimension(80, 80));
+        panel.setLayout(new BorderLayout());
+
+        JLabel label = new JLabel(text, SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 14));
+        panel.add(label, BorderLayout.CENTER);
+
+        return panel;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        textArea.append(evt.getNewValue().toString() + "\n");
-        label.setOpaque(true);
-        label.setBackground(new Color(
-                (int) (Math.random() * 256),
-                (int) (Math.random() * 256),
-                (int) (Math.random() * 256)));
+        String newValue = evt.getNewValue().toString();
+        textArea.append(newValue + "\n");
+
+        if (emotionPanels.containsKey(newValue)) {
+            JPanel panel = emotionPanels.get(newValue);
+            panel.setBackground(new Color(
+                    (int) (Math.random() * 256),
+                    (int) (Math.random() * 256),
+                    (int) (Math.random() * 256)
+            ));
+            panel.repaint();
+        }
     }
 }
-

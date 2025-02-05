@@ -17,11 +17,15 @@ public class Controller implements ActionListener{
         if (e.getActionCommand().equals("About")) {
             viewMain.about();
         } else if (e.getActionCommand().equals("Start")) {
-            System.out.println("Start");
+            viewMain.startEngine();
         } else if (e.getActionCommand().equals("Stop")) {
-            System.out.println("Stop");
-            viewMain.pauseThread(true);
+            viewMain.stopEngine();
+        } else if (e.getActionCommand().equals("Connect")) {
+            System.out.println("poop");
+        } else if (e.getActionCommand().equals("Switch to Publisher")) {
+            viewMain.toggleSubPanel();
+        } else if (e.getActionCommand().equals("Switch to Subscriber")) {
+            viewMain.toggleSubPanel();
         }
-
     }
 }
