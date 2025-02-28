@@ -1,13 +1,10 @@
 package mqtt;
 
 import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ViewPanel extends JPanel implements PropertyChangeListener {
 
@@ -27,53 +24,55 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
         add(circlePanel, BorderLayout.CENTER);
     }
 
-    // Handle property change events
+    // Handle property change events from MQTT messages
     public void propertyChange(PropertyChangeEvent evt) {
         if (Subscriber.line != null) {
             textArea.append(Subscriber.line + "\n");
-
-            try {
-                // Parse the JSON string
-                JSONObject json = new JSONObject(Subscriber.line);
-
-                // Extract eye gaze data
-                JSONObject leftEyeGaze = json.getJSONObject("leftEyeGaze");
-                JSONObject rightEyeGaze = json.getJSONObject("rightEyeGaze");
-
-                // Use the average of both eyes for smoother movement
-                float eyeX = (float) ((leftEyeGaze.getDouble("x") + rightEyeGaze.getDouble("x")) / 2.0);
-                float eyeY = (float) ((leftEyeGaze.getDouble("y") + rightEyeGaze.getDouble("y")) / 2.0);
-
-                // Extract hand gestures
-                boolean leftHandRaised = json.getBoolean("leftHandRaised");
-                boolean rightHandRaised = json.getBoolean("rightHandRaised");
-
-                // Extract posture for size adjustments
-                boolean leaningForward = json.getBoolean("leanForward");
-                boolean standingStraight = json.getBoolean("standUpStraight");
-
-                // Update color based on hand gestures
-                Color newColor = circlePanel.getColor();
-                if (leftHandRaised) newColor = Color.RED;   // Left hand raised -> Red
-                if (rightHandRaised) newColor = Color.BLUE; // Right hand raised -> Blue
-
-                // Update size based on posture
-                float newSize = circlePanel.getSizeFactor();
-                if (leaningForward) newSize = Math.max(0.5f, newSize - 0.1f); // Shrink
-                if (standingStraight) newSize = Math.min(2.0f, newSize + 0.1f); // Expand
-
-                // Move the circle using eye gaze data
-                circlePanel.updateCircle(eyeX, eyeY, newColor, newSize);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            System.out.println("eyeX");
+            processJson(Subscriber.line);
         }
     }
 
+    // Parses JSON and updates the UI
+    private void processJson(String jsonString) {
+        try {
+            JSONObject json = new JSONObject(jsonString);
+
+            // Extract eye gaze data
+            JSONObject leftEyeGaze = json.getJSONObject("leftEyeGaze");
+            JSONObject rightEyeGaze = json.getJSONObject("rightEyeGaze");
+
+            float eyeX = (float) ((leftEyeGaze.getDouble("x") + rightEyeGaze.getDouble("x")) / 2.0);
+            float eyeY = (float) ((leftEyeGaze.getDouble("y") + rightEyeGaze.getDouble("y")) / 2.0);
 
 
-    // Update the circle's position using normalized coordinates
+            // Extract hand gestures
+            boolean leftHandRaised = json.optBoolean("leftHandRaised", false);
+            boolean rightHandRaised = json.optBoolean("rightHandRaised", false);
+
+            // Extract posture
+            boolean leaningForward = json.optBoolean("leanForward", false);
+            boolean standingStraight = json.optBoolean("standUpStraight", false);
+
+            // Determine color based on hand gestures
+            Color newColor = circlePanel.getColor();
+            if (leftHandRaised) newColor = Color.RED;   // Left hand raised -> Red
+            if (rightHandRaised) newColor = Color.BLUE; // Right hand raised -> Blue
+
+            // Determine size based on posture
+            float newSize = circlePanel.getSizeFactor();
+            if (leaningForward) newSize = Math.max(0.5f, newSize - 0.1f); // Shrink
+            if (standingStraight) newSize = Math.min(2.0f, newSize + 0.1f); // Expand
+
+            // Update circle
+            circlePanel.updateCircle(eyeX, eyeY, newColor, newSize);
+
+        } catch (Exception e) {
+            System.out.println("Error parsing JSON: " + e.getMessage());
+        }
+    }
+
+    // Inner class to handle circle movement
     private static class CirclePanel extends JPanel {
         private float normalizedX = 0, normalizedY = 0; // Range: -1 to 1
         private float sizeFactor = 1.0f; // Default size scale
@@ -101,7 +100,6 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
         }
 
         public void updateCircle(float eyeX, float eyeY, Color color, float size) {
-            // Normalize eye gaze input (-1 to 1 range)
             this.normalizedX = Math.max(-1, Math.min(1, eyeX));
             this.normalizedY = Math.max(-1, Math.min(1, eyeY));
             this.circleColor = color;
@@ -117,6 +115,4 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
             return sizeFactor;
         }
     }
-
-
 }
