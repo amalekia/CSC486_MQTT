@@ -36,31 +36,45 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
                 // Parse the JSON string
                 JSONObject json = new JSONObject(Subscriber.line);
 
-                // Extract values (example: eyeFixationPoint for gaze tracking)
+                // Extract eye gaze data
                 JSONObject leftEyeGaze = json.getJSONObject("leftEyeGaze");
                 JSONObject rightEyeGaze = json.getJSONObject("rightEyeGaze");
 
-                float eyeX =  (float) leftEyeGaze.getDouble("x");
-                float eyeY =  (float) leftEyeGaze.getDouble("y");
+                float eyeX = (float) leftEyeGaze.getDouble("x");
+                float eyeY = (float) leftEyeGaze.getDouble("y");
 
+                // Extract head movement data
                 JSONObject head = json.getJSONObject("head");
+                float headX = (float) head.getDouble("x");
+                float headY = (float) head.getDouble("y");
 
-                float headX =  (float) head.getDouble("x");
-                float headY =  (float) head.getDouble("y");
+                // Extract arm movement
+                boolean leftHandRaised = json.getBoolean("leftHandRaised");
+                boolean rightHandRaised = json.getBoolean("rightHandRaised");
 
-                JSONObject leftArmUp = json.getJSONObject("leftArmUp");
+                // Extract posture
+                boolean leaningForward = json.getBoolean("leanForward");
+                boolean standingStraight = json.getBoolean("standUpStraight");
 
-                float leftArmX =  (float) leftArmUp.getDouble("x");
-                float leftArmY =  (float) leftArmUp.getDouble("y");
+                // Move the circle based on gaze
+                float moveX = 0, moveY = 0;
+                if (headX < -0.5) moveX = -0.1f;  // Look left
+                if (headX > 0.5) moveX = 0.1f;   // Look right
+                if (headY > 0.5) moveY = 0.1f;   // Look up
+                if (headY < -0.5) moveY = -0.1f; // Look down
 
-                JSONObject rightArmUp = json.getJSONObject("rightArmUp");
+                // Change color based on hand raise
+                Color newColor = circlePanel.getColor();
+                if (leftHandRaised) newColor = Color.RED;   // Raise left hand -> Red
+                if (rightHandRaised) newColor = Color.BLUE; // Raise right hand -> Blue
 
-                float rightArmX =  (float) rightArmUp.getDouble("x");
-                float rightArmY =  (float) rightArmUp.getDouble("y");
+                // Change size based on posture
+                float newSize = circlePanel.getSizeFactor();
+                if (leaningForward) newSize = Math.max(0.5f, newSize - 0.1f); // Shrink
+                if (standingStraight) newSize = Math.min(2.0f, newSize + 0.1f); // Expand
 
-
-                // Update the circle position based on extracted x and y
-                updateCircle(eyeX, eyeY);
+                // Update the circle properties
+                circlePanel.updateCircle(moveX, moveY, newColor, newSize);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -68,15 +82,13 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
         }
     }
 
-    // Update the circle's position using normalized coordinates
-    public void updateCircle(float x, float y) {
-        circlePanel.updatePosition(x, y);
-    }
 
-    // Inner class for the circle panel
+    // Update the circle's position using normalized coordinates
     private static class CirclePanel extends JPanel {
         private float normalizedX = 0, normalizedY = 0; // -1 to 1
-        private static final int DIAMETER = 50;
+        private float sizeFactor = 1.0f; // Scale factor for size
+        private Color circleColor = Color.BLUE; // Default color
+        private static final int BASE_DIAMETER = 50;
 
         public CirclePanel() {
             setPreferredSize(new Dimension(400, 400));
@@ -91,18 +103,28 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
             // Convert normalized (-1 to 1) to pixel coordinates
             int centerX = width / 2;
             int centerY = height / 2;
-            int circleX = centerX + (int) (normalizedX * (width / 2)) - DIAMETER / 2;
-            int circleY = centerY - (int) (normalizedY * (height / 2)) - DIAMETER / 2;
+            int circleX = centerX + (int) (normalizedX * (width / 2)) - (int)(BASE_DIAMETER * sizeFactor) / 2;
+            int circleY = centerY - (int) (normalizedY * (height / 2)) - (int)(BASE_DIAMETER * sizeFactor) / 2;
 
-            g.setColor(Color.BLUE);
-            g.fillOval(circleX, circleY, DIAMETER, DIAMETER);
+            g.setColor(circleColor);
+            g.fillOval(circleX, circleY, (int)(BASE_DIAMETER * sizeFactor), (int)(BASE_DIAMETER * sizeFactor));
         }
 
-        // Method to update circle position using normalized (-1 to 1) coordinates
-        public void updatePosition(float x, float y) {
-            this.normalizedX = Math.max(-1, Math.min(1, x)); // Clamp between -1 and 1
-            this.normalizedY = Math.max(-1, Math.min(1, y));
-            repaint(); // Redraw the panel
+        public void updateCircle(float deltaX, float deltaY, Color color, float size) {
+            this.normalizedX = Math.max(-1, Math.min(1, normalizedX + deltaX));
+            this.normalizedY = Math.max(-1, Math.min(1, normalizedY + deltaY));
+            this.circleColor = color;
+            this.sizeFactor = size;
+            repaint();
+        }
+
+        public Color getColor() {
+            return circleColor;
+        }
+
+        public float getSizeFactor() {
+            return sizeFactor;
         }
     }
+
 }
