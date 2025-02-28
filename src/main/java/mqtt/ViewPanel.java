@@ -1,5 +1,7 @@
 package mqtt;
 
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -29,12 +31,40 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (Subscriber.line != null) {
             textArea.append(Subscriber.line + "\n");
-            String[] words = Subscriber.line.split(", ");
 
-            // Convert normalized values (-1 to 1) to relative positions
-            float x = Float.parseFloat(words[26]);
-            float y = Float.parseFloat(words[27]);
-            updateCircle(x, y);
+            try {
+                // Parse the JSON string
+                JSONObject json = new JSONObject(Subscriber.line);
+
+                // Extract values (example: eyeFixationPoint for gaze tracking)
+                JSONObject leftEyeGaze = json.getJSONObject("leftEyeGaze");
+                JSONObject rightEyeGaze = json.getJSONObject("rightEyeGaze");
+
+                float eyeX =  (float) leftEyeGaze.getDouble("x");
+                float eyeY =  (float) leftEyeGaze.getDouble("y");
+
+                JSONObject head = json.getJSONObject("head");
+
+                float headX =  (float) head.getDouble("x");
+                float headY =  (float) head.getDouble("y");
+
+                JSONObject leftArmUp = json.getJSONObject("leftArmUp");
+
+                float leftArmX =  (float) leftArmUp.getDouble("x");
+                float leftArmY =  (float) leftArmUp.getDouble("y");
+
+                JSONObject rightArmUp = json.getJSONObject("rightArmUp");
+
+                float rightArmX =  (float) rightArmUp.getDouble("x");
+                float rightArmY =  (float) rightArmUp.getDouble("y");
+
+
+                // Update the circle position based on extracted x and y
+                updateCircle(eyeX, eyeY);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
