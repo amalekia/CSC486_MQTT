@@ -30,7 +30,7 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
     // Handle property change events
     public void propertyChange(PropertyChangeEvent evt) {
         if (Subscriber.line != null) {
-            textArea.append(Subscriber.line + "\n");
+            // textArea.append(Subscriber.line + "\n");
 
             try {
                 // Parse the JSON string
@@ -44,13 +44,45 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
                 float eyeX = (float) ((leftEyeGaze.getDouble("x") + rightEyeGaze.getDouble("x")) / 2.0);
                 float eyeY = (float) ((leftEyeGaze.getDouble("y") + rightEyeGaze.getDouble("y")) / 2.0);
 
+
                 // Extract hand gestures
-                boolean leftHandRaised = json.getBoolean("leftHandRaised");
-                boolean rightHandRaised = json.getBoolean("rightHandRaised");
+                float leftArmUp = json.getJSONObject("leftArmUp").getFloat("x");
+                float rightArmUp = json.getJSONObject("rightArmUp").getFloat("x");
+
+                float leftArmLow = json.getJSONObject("leftArmLow").getFloat("x");
+                float rightArmLow = json.getJSONObject("rightArmLow").getFloat("x");
+
+                boolean leftHandRaised;
+                boolean rightHandRaised;
+
+                if (leftArmUp < leftArmLow){
+                    leftHandRaised = true;
+                }else{
+                    leftHandRaised = false;
+                }
+
+                if (rightArmUp < rightArmLow){
+                    rightHandRaised = true;
+                }else{
+                    rightHandRaised = false;
+                }
+
+
 
                 // Extract posture for size adjustments
-                boolean leaningForward = json.getBoolean("leanForward");
-                boolean standingStraight = json.getBoolean("standUpStraight");
+                float headPos = json.getJSONObject("head").getFloat("z");
+
+                boolean posture;
+
+                if (headPos > 1.25){
+                    posture = true;
+                }else{
+                    posture = false;
+                }
+
+
+
+
 
                 // Update color based on hand gestures
                 Color newColor = circlePanel.getColor();
@@ -59,8 +91,11 @@ public class ViewPanel extends JPanel implements PropertyChangeListener {
 
                 // Update size based on posture
                 float newSize = circlePanel.getSizeFactor();
-                if (leaningForward) newSize = Math.max(0.5f, newSize - 0.1f); // Shrink
-                if (standingStraight) newSize = Math.min(2.0f, newSize + 0.1f); // Expand
+                if (posture){
+                    newSize = Math.max(0.5f, newSize - 0.1f); // Shrink
+                }else{
+                    newSize = Math.min(2.0f, newSize + 0.1f);  // Expand
+                }
 
                 // Move the circle using eye gaze data
                 circlePanel.updateCircle(eyeX, eyeY, newColor, newSize);

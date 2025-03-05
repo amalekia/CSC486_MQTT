@@ -20,7 +20,7 @@ public class Subscriber implements MqttCallback, Runnable {
 	public static String line;
 	public int counter = 0;
 	private final static String BROKER = "tcp://test.mosquitto.org:1883";
-	private final static String TOPIC = "javiergs/tobii/gazedata";
+	private final static String TOPIC = "adr-spence";
 	private final static String CLIENT_ID = "csv-subscriber";
 	private MqttClient client;
 
